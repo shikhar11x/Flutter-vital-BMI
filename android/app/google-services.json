@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1065046409502",
+    "project_id": "vitalbmi-xi",
+    "storage_bucket": "vitalbmi-xi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065046409502:android:9382976eb86055a465890f",
+        "android_client_info": {
+          "package_name": "com.example.vital_bmi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1065046409502-eto5u04hpb5uuqg2dbtb094ko4q03sgg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAteithcCpQVgeEx6DQFpkuHZxn8W-DoRc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1065046409502-eto5u04hpb5uuqg2dbtb094ko4q03sgg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1065046409502-i587724294ptr975im9loiqfjfcfscaj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vitalBmi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
