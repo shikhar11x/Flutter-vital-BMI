@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_radius.dart';
 
 /// Custom text field widget
 class AppTextField extends StatefulWidget {
@@ -20,7 +19,7 @@ class AppTextField extends StatefulWidget {
   final bool enabled;
 
   const AppTextField({
-    Key? key,
+    super.key,
     required this.label,
     required this.hintText,
     required this.controller,
@@ -33,7 +32,7 @@ class AppTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -41,7 +40,7 @@ class AppTextField extends StatefulWidget {
 
 class _AppTextFieldState extends State<AppTextField> {
   late FocusNode _focusNode;
-  bool _isObscured = true;
+  late bool _isObscured;
 
   @override
   void initState() {
@@ -61,10 +60,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: AppTextStyles.label,
-        ),
+        Text(widget.label, style: AppTextStyles.label),
         const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: widget.controller,
@@ -106,11 +102,7 @@ class EmailTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
 
-  const EmailTextField({
-    Key? key,
-    required this.controller,
-    this.validator,
-  }) : super(key: key);
+  const EmailTextField({super.key, required this.controller, this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -131,10 +123,10 @@ class PasswordTextField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const PasswordTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.validator,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -159,13 +151,13 @@ class NumberTextField extends StatelessWidget {
   final void Function(String)? onChanged;
 
   const NumberTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     required this.hintText,
     this.validator,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

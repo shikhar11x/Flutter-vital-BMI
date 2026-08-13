@@ -6,12 +6,12 @@ class BMICalculator {
   BMICalculator._(); // Private constructor
 
   /// Calculate BMI from weight and height
-  /// 
+  ///
   /// [weight] - Weight in the specified unit
   /// [weightUnit] - 'kg' or 'lbs'
   /// [height] - Height in the specified unit
   /// [heightUnit] - 'cm' or 'in'
-  /// 
+  ///
   /// Returns BMI value rounded to 1 decimal place
   static double calculateBMI({
     required double weight,
@@ -44,7 +44,7 @@ class BMICalculator {
   }
 
   /// Get BMI category based on BMI value
-  /// 
+  ///
   /// Returns one of:
   /// - 'Underweight' (BMI < 18.5)
   /// - 'Normal Weight' (18.5 - 24.9)
@@ -87,7 +87,7 @@ class BMICalculator {
 
   /// Get BMI position for visualization scale (0.0 to 1.0)
   /// Used for BMI gauge/scale indicator
-  /// 
+  ///
   /// Scale:
   /// 0.0 = Underweight (BMI 10)
   /// 0.25 = Normal start (BMI 18.5)
@@ -122,18 +122,30 @@ class BMICalculator {
   static Map<String, double> getHealthyWeightRange(double heightCm) {
     double heightM = heightCm / 100;
     return {
-      'min': double.parse(
-        (18.5 * heightM * heightM).toStringAsFixed(1),
-      ),
-      'max': double.parse(
-        (24.9 * heightM * heightM).toStringAsFixed(1),
-      ),
+      'min': double.parse((18.5 * heightM * heightM).toStringAsFixed(1)),
+      'max': double.parse((24.9 * heightM * heightM).toStringAsFixed(1)),
     };
   }
 
   /// Check if BMI is in healthy range
   static bool isHealthyBMI(double bmi) {
-    return bmi >= BMIConstants.normalMin &&
-        bmi <= BMIConstants.normalMax;
+    return bmi >= BMIConstants.normalMin && bmi <= BMIConstants.normalMax;
+  }
+
+  /// Get healthy BMI range based on BMI category
+  /// Returns map with 'min' and 'max' BMI values for the category
+  static Map<String, String> getHealthyRange(String category) {
+    switch (category) {
+      case BMIConstants.categoryUnderweight:
+        return {'min': '10.0', 'max': '18.4'};
+      case BMIConstants.categoryNormal:
+        return {'min': '18.5', 'max': '24.9'};
+      case BMIConstants.categoryOverweight:
+        return {'min': '25.0', 'max': '29.9'};
+      case BMIConstants.categoryObese:
+        return {'min': '30.0', 'max': '40.0'};
+      default:
+        return {'min': '18.5', 'max': '24.9'};
+    }
   }
 }

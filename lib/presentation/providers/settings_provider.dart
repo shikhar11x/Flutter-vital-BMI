@@ -1,29 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../../core/constants/app_constants.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
-/// Settings state
+// ============== SETTINGS MODEL ==============
+
 class AppSettings {
-  final String themeMode;
+  final String theme;
   final String weightUnit;
   final String heightUnit;
   final bool notificationsEnabled;
 
   const AppSettings({
-    this.themeMode = 'dark',
-    this.weightUnit = 'kg',
-    this.heightUnit = 'cm',
+    this.theme = 'dark',
+    this.weightUnit = 'KG',
+    this.heightUnit = 'CM',
     this.notificationsEnabled = true,
   });
 
   AppSettings copyWith({
-    String? themeMode,
+    String? theme,
     String? weightUnit,
     String? heightUnit,
     bool? notificationsEnabled,
   }) {
     return AppSettings(
-      themeMode: themeMode ?? this.themeMode,
+      theme: theme ?? this.theme,
       weightUnit: weightUnit ?? this.weightUnit,
       heightUnit: heightUnit ?? this.heightUnit,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -31,86 +31,49 @@ class AppSettings {
   }
 }
 
-/// Settings notifier
+// ============== STATE NOTIFIER ==============
+
 class SettingsNotifier extends StateNotifier<AppSettings> {
-  late Box<String> _preferencesBox;
+  SettingsNotifier() : super(const AppSettings());
 
-  SettingsNotifier() : super(const AppSettings()) {
-    _initializeBox();
+  void setTheme(String theme) {
+    state = state.copyWith(theme: theme);
   }
 
-  Future<void> _initializeBox() async {
-    try {
-      _preferencesBox =
-          Hive.box<String>(AppConstants.hiveBoxAppPreferences);
-      _loadSettings();
-    } catch (e) {
-      print('Error initializing settings box: $e');
-    }
+  void setWeightUnit(String unit) {
+    state = state.copyWith(weightUnit: unit);
   }
 
-  void _loadSettings() {
-    final themeMode = _preferencesBox.get(
-          AppConstants.keyThemeMode,
-          defaultValue: 'dark',
-        ) ??
-        'dark';
-    final weightUnit = _preferencesBox.get(
-          AppConstants.keyWeightUnit,
-          defaultValue: 'kg',
-        ) ??
-        'kg';
-    final heightUnit = _preferencesBox.get(
-          AppConstants.keyHeightUnit,
-          defaultValue: 'cm',
-        ) ??
-        'cm';
-
-    state = AppSettings(
-      themeMode: themeMode,
-      weightUnit: weightUnit,
-      heightUnit: heightUnit,
-    );
+  void setHeightUnit(String unit) {
+    state = state.copyWith(heightUnit: unit);
   }
 
-  Future<void> setThemeMode(String mode) async {
-    try {
-      await _preferencesBox.put(AppConstants.keyThemeMode, mode);
-      state = state.copyWith(themeMode: mode);
-    } catch (e) {
-      print('Error setting theme: $e');
-    }
-  }
-
-  Future<void> setWeightUnit(String unit) async {
-    try {
-      await _preferencesBox.put(AppConstants.keyWeightUnit, unit);
-      state = state.copyWith(weightUnit: unit);
-    } catch (e) {
-      print('Error setting weight unit: $e');
-    }
-  }
-
-  Future<void> setHeightUnit(String unit) async {
-    try {
-      await _preferencesBox.put(AppConstants.keyHeightUnit, unit);
-      state = state.copyWith(heightUnit: unit);
-    } catch (e) {
-      print('Error setting height unit: $e');
-    }
-  }
-
-  Future<void> setNotificationsEnabled(bool enabled) async {
-    try {
-      state = state.copyWith(notificationsEnabled: enabled);
-    } catch (e) {
-      print('Error setting notifications: $e');
-    }
+  void setNotifications(bool enabled) {
+    state = state.copyWith(notificationsEnabled: enabled);
   }
 }
 
-/// Settings provider
+// ============== MAIN PROVIDER ==============
+
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
   return SettingsNotifier();
+});
+
+// ============== DERIVED PROVIDERS ==============
+
+final themeProvider = Provider<String>((ref) {
+  return ref.watch(settingsProvider).theme;
+});
+
+final weightUnitProvider = Provider<String>((ref) {
+  return ref.watch(settingsProvider).weightUnit;
+});
+
+final heightUnitProvider = Provider<String>((ref) {
+  return ref.watch(settingsProvider).heightUnit;
+});
+
+final notificationsProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).notificationsEnabled;
 });

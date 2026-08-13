@@ -13,13 +13,13 @@ class StatCard extends StatelessWidget {
   final String? unit;
 
   const StatCard({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.change,
     this.isPositive = false,
     this.unit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,7 @@ class StatCardsRow extends StatelessWidget {
   final bool isPositive2;
 
   const StatCardsRow({
-    Key? key,
+    super.key,
     required this.label1,
     required this.value1,
     required this.unit1,
@@ -113,7 +113,7 @@ class StatCardsRow extends StatelessWidget {
     required this.unit2,
     this.change2,
     this.isPositive2 = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

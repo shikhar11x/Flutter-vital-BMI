@@ -11,9 +11,7 @@ void main() async {
   // Step 1: Load environment variables (with error handling for web)
   try {
     await dotenv.load(fileName: ".env");
-    print('✅ Environment variables loaded');
   } catch (e) {
-    print('⚠️ .env file not found (normal on web): $e');
     // Continue anyway - use default values
   }
 
@@ -21,26 +19,22 @@ void main() async {
   try {
     await FirebaseService.initialize();
   } catch (e) {
-    print('⚠️ Firebase initialization warning: $e');
+    // Firebase initialization warning
   }
 
   // Step 3: Initialize Hive local storage
   try {
     await HiveService.initialize();
   } catch (e) {
-    print('⚠️ Hive initialization warning: $e');
+    // Hive initialization warning
   }
 
-  runApp(
-    const ProviderScope(
-      child: VitalBMIApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: VitalBMIApp()));
 }
 
 /// Main App Widget
 class VitalBMIApp extends ConsumerWidget {
-  const VitalBMIApp({Key? key}) : super(key: key);
+  const VitalBMIApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,7 +49,7 @@ class VitalBMIApp extends ConsumerWidget {
 
 /// Temporary Home Screen (will be replaced with router in Phase 4)
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,16 +58,9 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.favorite,
-              color: Color(0xFF8B5CF6),
-              size: 64,
-            ),
+            const Icon(Icons.favorite, color: Color(0xFF8B5CF6), size: 64),
             const SizedBox(height: 16),
-            Text(
-              'VitalBMI',
-              style: Theme.of(context).textTheme.displayLarge,
-            ),
+            Text('VitalBMI', style: Theme.of(context).textTheme.displayLarge),
             const SizedBox(height: 8),
             Text(
               'Smart BMI & Weight Tracker',
@@ -105,10 +92,9 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     '🚀 Phase 4: UI Screens (Next)',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(color: const Color(0xFF8B5CF6)),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF8B5CF6),
+                    ),
                   ),
                 ],
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_radius.dart';
 
 /// Primary action button
 class AppButton extends StatelessWidget {
@@ -14,14 +13,14 @@ class AppButton extends StatelessWidget {
   final double height;
 
   const AppButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
     this.isEnabled = true,
     this.width,
     this.height = 56,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +58,13 @@ class AppOutlinedButton extends StatelessWidget {
   final double height;
 
   const AppOutlinedButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.isEnabled = true,
     this.width,
     this.height = 56,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,11 +89,11 @@ class AppTextButton extends StatelessWidget {
   final Color? color;
 
   const AppTextButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,11 +116,11 @@ class AppSmallButton extends StatelessWidget {
   final bool isPrimary;
 
   const AppSmallButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.isPrimary = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +132,6 @@ class AppSmallButton extends StatelessWidget {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
         ),
         child: Text(label, style: AppTextStyles.label),
       );
@@ -146,9 +142,6 @@ class AppSmallButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
         ),
         child: Text(label, style: AppTextStyles.label),

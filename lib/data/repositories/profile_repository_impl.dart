@@ -1,14 +1,13 @@
 import '../../domain/entities/profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_datasource.dart';
-import '../../core/errors/app_exception.dart';
+import '../models/profile_model.dart';
 
 /// Concrete implementation of ProfileRepository
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileDatasource _datasource;
 
-  ProfileRepositoryImpl({required ProfileDatasource datasource})
-      : _datasource = datasource;
+  ProfileRepositoryImpl({required this._datasource});
 
   @override
   Future<ProfileEntity> createProfile({
@@ -67,11 +66,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<ProfileEntity> updateProfile({
-    required ProfileEntity profile,
-  }) async {
+  Future<ProfileEntity> updateProfile({required ProfileEntity profile}) async {
     try {
-      final model = await _datasource.updateProfile(profile: profile);
+      final model = await _datasource.updateProfile(
+        profile: ProfileModel.fromEntity(profile),
+      );
       return model.toEntity();
     } catch (e) {
       rethrow;
@@ -84,10 +83,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String profileId,
   }) async {
     try {
-      await _datasource.setActiveProfile(
-        userId: userId,
-        profileId: profileId,
-      );
+      await _datasource.setActiveProfile(userId: userId, profileId: profileId);
     } catch (e) {
       rethrow;
     }
@@ -113,9 +109,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Stream<List<ProfileEntity>> getUserProfilesStream({
-    required String userId,
-  }) {
+  Stream<List<ProfileEntity>> getUserProfilesStream({required String userId}) {
     return _datasource
         .getUserProfilesStream(userId: userId)
         .map((profiles) => profiles.map((p) => p.toEntity()).toList());

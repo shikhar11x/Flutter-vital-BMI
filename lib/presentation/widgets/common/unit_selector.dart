@@ -12,12 +12,12 @@ class UnitSelector extends StatelessWidget {
   final String? label;
 
   const UnitSelector({
-    Key? key,
+    super.key,
     required this.selectedUnit,
     required this.units,
     required this.onUnitChanged,
     this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +83,10 @@ class WeightUnitSelector extends StatelessWidget {
   final Function(String) onUnitChanged;
 
   const WeightUnitSelector({
-    Key? key,
+    super.key,
     required this.selectedUnit,
     required this.onUnitChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -104,10 +104,10 @@ class HeightUnitSelector extends StatelessWidget {
   final Function(String) onUnitChanged;
 
   const HeightUnitSelector({
-    Key? key,
+    super.key,
     required this.selectedUnit,
     required this.onUnitChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

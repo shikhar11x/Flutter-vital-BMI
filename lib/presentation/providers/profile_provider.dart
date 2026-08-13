@@ -1,88 +1,63 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/profile_entity.dart';
-import '../../domain/repositories/profile_repository.dart';
-import '../../data/repositories/profile_repository_impl.dart';
 import '../../data/datasources/profile_datasource.dart';
-import 'auth_provider.dart';
+import '../../data/repositories/profile_repository_impl.dart';
+import '../../domain/repositories/profile_repository.dart';
+import '../../core/errors/app_exception.dart';
 
-// ============= PROFILE REPOSITORY PROVIDER =============
+// ============== DATASOURCES ==============
 
-/// Provider for Profile Datasource
 final profileDatasourceProvider = Provider<ProfileDatasource>((ref) {
   return FirestoreProfileDatasource();
 });
 
-/// Provider for Profile Repository
+// ============== REPOSITORIES ==============
+
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   final datasource = ref.watch(profileDatasourceProvider);
   return ProfileRepositoryImpl(datasource: datasource);
 });
 
-// ============= PROFILE STATE PROVIDERS =============
+// ============== STATE CLASS ==============
 
-/// Get all profiles for current user
-final userProfilesProvider = FutureProvider<List<ProfileEntity>>((ref) async {
-  final authState = ref.watch(authStateProvider);
-  final profileRepository = ref.watch(profileRepositoryProvider);
+class ProfileState {
+  final List<ProfileEntity> profiles;
+  final ProfileEntity? activeProfile;
+  final bool isLoading;
+  final String? error;
 
-  return authState.whenData((user) async {
-    if (user == null) return [];
-    return profileRepository.getUserProfiles(userId: user.id);
-  }).then((value) => value.asData?.value ?? []);
-});
+  const ProfileState({
+    this.profiles = const [],
+    this.activeProfile,
+    this.isLoading = false,
+    this.error,
+  });
 
-/// Stream of user's profiles
-final userProfilesStreamProvider =
-    StreamProvider<List<ProfileEntity>>((ref) async* {
-  final authState = ref.watch(authStateProvider);
-
-  await for (final user in authState.stream) {
-    if (user == null) {
-      yield [];
-    } else {
-      final profileRepository = ref.watch(profileRepositoryProvider);
-      yield* profileRepository.getUserProfilesStream(userId: user.id);
-    }
+  ProfileState copyWith({
+    List<ProfileEntity>? profiles,
+    ProfileEntity? activeProfile,
+    bool? isLoading,
+    String? error,
+  }) {
+    return ProfileState(
+      profiles: profiles ?? this.profiles,
+      activeProfile: activeProfile ?? this.activeProfile,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
   }
-});
+}
 
-/// Get active profile
-final activeProfileProvider = FutureProvider<ProfileEntity?>((ref) async {
-  final authState = ref.watch(authStateProvider);
-  final profileRepository = ref.watch(profileRepositoryProvider);
+// ============== STATE NOTIFIER ==============
 
-  return authState.whenData((user) async {
-    if (user == null) return null;
-    return profileRepository.getActiveProfile(userId: user.id);
-  }).then((value) => value.asData?.value);
-});
+class ProfileNotifier extends StateNotifier<ProfileState> {
+  final ProfileRepository repository;
+  final String userId;
 
-/// Stream of active profile
-final activeProfileStreamProvider =
-    StreamProvider<ProfileEntity?>((ref) async* {
-  final authState = ref.watch(authStateProvider);
+  ProfileNotifier(this.repository, this.userId) : super(const ProfileState());
 
-  await for (final user in authState.stream) {
-    if (user == null) {
-      yield null;
-    } else {
-      final profileRepository = ref.watch(profileRepositoryProvider);
-      yield* profileRepository.getActiveProfileStream(userId: user.id);
-    }
-  }
-});
-
-// ============= PROFILE ACTIONS (StateNotifier) =============
-
-/// Profile state notifier for manual state management
-class ProfileStateNotifier extends StateNotifier<ProfileEntity?> {
-  final ProfileRepository _profileRepository;
-  final String _userId;
-
-  ProfileStateNotifier(this._profileRepository, this._userId) : super(null);
-
-  /// Create new profile
-  Future<ProfileEntity> createProfile({
+  Future<void> createProfile({
     required String name,
     required String gender,
     required double height,
@@ -90,9 +65,10 @@ class ProfileStateNotifier extends StateNotifier<ProfileEntity?> {
     required double weight,
     required String weightUnit,
   }) async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
-      final profile = await _profileRepository.createProfile(
-        userId: _userId,
+      final profile = await repository.createProfile(
+        userId: userId,
         name: name,
         gender: gender,
         height: height,
@@ -100,53 +76,125 @@ class ProfileStateNotifier extends StateNotifier<ProfileEntity?> {
         weight: weight,
         weightUnit: weightUnit,
       );
-      state = profile;
-      return profile;
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  /// Update profile
-  Future<ProfileEntity> updateProfile({
-    required ProfileEntity profile,
-  }) async {
-    try {
-      final updated = await _profileRepository.updateProfile(profile: profile);
-      state = updated;
-      return updated;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Set active profile
-  Future<void> setActiveProfile({required String profileId}) async {
-    try {
-      await _profileRepository.setActiveProfile(
-        userId: _userId,
-        profileId: profileId,
+      state = state.copyWith(
+        profiles: [...state.profiles, profile],
+        activeProfile: profile,
+        isLoading: false,
       );
-    } catch (e) {
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
     }
   }
 
-  /// Delete profile
-  Future<void> deleteProfile({required String profileId}) async {
+  Future<void> loadProfiles() async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
-      await _profileRepository.deleteProfile(profileId: profileId);
-      state = null;
-    } catch (e) {
+      final profiles = await repository.getUserProfiles(userId: userId);
+      final active = await repository.getActiveProfile(userId: userId);
+
+      state = state.copyWith(
+        profiles: profiles,
+        activeProfile: active,
+        isLoading: false,
+      );
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      rethrow;
+    }
+  }
+
+  Future<void> setActiveProfile(String profileId) async {
+    try {
+      await repository.setActiveProfile(userId: userId, profileId: profileId);
+
+      final profile = state.profiles.firstWhere(
+        (p) => p.id == profileId,
+        orElse: () => state.profiles.first,
+      );
+
+      state = state.copyWith(activeProfile: profile);
+    } on AppException catch (e) {
+      state = state.copyWith(error: e.message);
+      rethrow;
+    }
+  }
+
+  Future<void> updateProfile(ProfileEntity profile) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updated = await repository.updateProfile(profile: profile);
+
+      final updatedProfiles = state.profiles
+          .map((p) => p.id == updated.id ? updated : p)
+          .toList();
+
+      state = state.copyWith(
+        profiles: updatedProfiles,
+        activeProfile:
+            state.activeProfile?.id == updated.id ? updated : state.activeProfile,
+        isLoading: false,
+      );
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteProfile(String profileId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await repository.deleteProfile(profileId: profileId);
+
+      final updatedProfiles =
+          state.profiles.where((p) => p.id != profileId).toList();
+
+      state = state.copyWith(
+        profiles: updatedProfiles,
+        activeProfile:
+            state.activeProfile?.id == profileId ? null : state.activeProfile,
+        isLoading: false,
+      );
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
     }
   }
 }
 
-/// Provider for Profile State Notifier
-final profileStateNotifierProvider =
-    StateNotifierProvider.family<ProfileStateNotifier, ProfileEntity?, String>(
-        (ref, userId) {
-  final profileRepository = ref.watch(profileRepositoryProvider);
-  return ProfileStateNotifier(profileRepository, userId);
-});
+// ============== FAMILY PROVIDER ==============
+
+final profileProvider =
+    StateNotifierProvider.family<ProfileNotifier, ProfileState, String>(
+  (ref, userId) {
+    final repository = ref.watch(profileRepositoryProvider);
+    return ProfileNotifier(repository, userId);
+  },
+);
+
+// ============== DERIVED PROVIDERS ==============
+
+final userProfilesProvider = Provider.family<List<ProfileEntity>, String>(
+  (ref, userId) {
+    return ref.watch(profileProvider(userId)).profiles;
+  },
+);
+
+final activeProfileProvider = Provider.family<ProfileEntity?, String>(
+  (ref, userId) {
+    return ref.watch(profileProvider(userId)).activeProfile;
+  },
+);
+
+final profileLoadingProvider = Provider.family<bool, String>(
+  (ref, userId) {
+    return ref.watch(profileProvider(userId)).isLoading;
+  },
+);
+
+final profileErrorProvider = Provider.family<String?, String>(
+  (ref, userId) {
+    return ref.watch(profileProvider(userId)).error;
+  },
+);

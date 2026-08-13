@@ -8,9 +8,7 @@ class FirebaseService {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      print('Firebase initialized successfully');
     } catch (e) {
-      print('Firebase initialization failed: $e');
       rethrow;
     }
   }

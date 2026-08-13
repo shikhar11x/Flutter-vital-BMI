@@ -7,8 +7,7 @@ import '../datasources/weight_datasource.dart';
 class WeightRepositoryImpl implements WeightRepository {
   final WeightDatasource _datasource;
 
-  WeightRepositoryImpl({required WeightDatasource datasource})
-      : _datasource = datasource;
+  WeightRepositoryImpl({required this._datasource});
 
   @override
   Future<WeightEntryEntity> addWeightEntry({
@@ -73,8 +72,9 @@ class WeightRepositoryImpl implements WeightRepository {
     required String profileId,
   }) async {
     try {
-      final entry =
-          await _datasource.getLatestWeightEntry(profileId: profileId);
+      final entry = await _datasource.getLatestWeightEntry(
+        profileId: profileId,
+      );
       return entry?.toEntity();
     } catch (e) {
       rethrow;

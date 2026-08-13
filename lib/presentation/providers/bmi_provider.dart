@@ -2,55 +2,65 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/bmi_calculator.dart';
 import 'profile_provider.dart';
 
-/// BMI result model
+// ============== BMI RESULT MODEL ==============
+
 class BMIResult {
   final double bmi;
   final String category;
-  final String description;
-  final Map<String, double> healthyRange;
+  final String healthyRangeMin;
+  final String healthyRangeMax;
 
   const BMIResult({
     required this.bmi,
     required this.category,
-    required this.description,
-    required this.healthyRange,
+    required this.healthyRangeMin,
+    required this.healthyRangeMax,
   });
 }
 
-/// Calculate BMI for active profile
-final bmiProvider = FutureProvider<BMIResult?>((ref) async {
-  final activeProfile = ref.watch(activeProfileProvider);
+// ============== PROVIDER ==============
 
-  return activeProfile.whenData((profile) {
-    if (profile == null) return null;
+final bmiProvider = Provider.family<BMIResult?, String>((ref, userId) {
+  final activeProfile = ref.watch(activeProfileProvider(userId));
 
-    final bmi = BMICalculator.calculateBMI(
-      weight: profile.weight,
-      weightUnit: profile.weightUnit,
-      height: profile.height,
-      heightUnit: profile.heightUnit,
-    );
+  if (activeProfile == null) {
+    return null;
+  }
 
-    final category = BMICalculator.getBMICategory(bmi);
-    final description = BMICalculator.getBMIDescription(category);
-    final healthyRange =
-        BMICalculator.getHealthyWeightRange(profile.height);
+  final bmi = BMICalculator.calculateBMI(
+    height: activeProfile.height,
+    weight: activeProfile.weight,
+    heightUnit: activeProfile.heightUnit,
+    weightUnit: activeProfile.weightUnit,
+  );
 
-    return BMIResult(
-      bmi: bmi,
-      category: category,
-      description: description,
-      healthyRange: healthyRange,
-    );
-  }).then((value) => value.asData?.value);
+  final category = BMICalculator.getBMICategory(bmi);
+  final range = BMICalculator.getHealthyRange(category);
+
+  return BMIResult(
+    bmi: bmi,
+    category: category,
+    healthyRangeMin: range['min'] ?? '18.5',
+    healthyRangeMax: range['max'] ?? '24.9',
+  );
 });
 
-/// BMI scale position (0.0 to 1.0)
-final bmiScalePositionProvider = FutureProvider<double>((ref) async {
-  final bmiResult = ref.watch(bmiProvider);
+final bmiScalePositionProvider = Provider.family<double, String>(
+  (ref, userId) {
+    final bmiResult = ref.watch(bmiProvider(userId));
 
-  return bmiResult.whenData((result) {
-    if (result == null) return 0.0;
-    return BMICalculator.getBMIScalePosition(result.bmi);
-  }).then((value) => value.asData?.value ?? 0.0);
-});
+    if (bmiResult == null) {
+      return 0.5;
+    }
+
+    if (bmiResult.bmi < 18.5) {
+      return (bmiResult.bmi / 18.5).clamp(0.0, 0.33);
+    } else if (bmiResult.bmi < 25) {
+      return 0.33 + ((bmiResult.bmi - 18.5) / 6.5 * 0.33).clamp(0.0, 0.33);
+    } else if (bmiResult.bmi < 30) {
+      return 0.66 + ((bmiResult.bmi - 25) / 5 * 0.34).clamp(0.0, 0.34);
+    } else {
+      return 1.0;
+    }
+  },
+);

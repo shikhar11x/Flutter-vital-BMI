@@ -13,14 +13,14 @@ class AppCard extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   const AppCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.onTap,
     this.backgroundColor,
     this.elevation,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +48,10 @@ class SimpleCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   const SimpleCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class SimpleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

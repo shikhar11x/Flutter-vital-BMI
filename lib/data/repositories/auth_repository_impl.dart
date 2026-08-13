@@ -8,8 +8,7 @@ import '../../core/errors/app_exception.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthDatasource _datasource;
 
-  AuthRepositoryImpl({required AuthDatasource datasource})
-      : _datasource = datasource;
+  AuthRepositoryImpl({required this._datasource});
 
   @override
   Future<bool> isUserLoggedIn() async {
@@ -92,9 +91,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       // TODO: Implement password reset with OOB code
-      throw UnknownException(
-        message: 'Password reset not yet implemented',
-      );
+      throw UnknownException(message: 'Password reset not yet implemented');
     } catch (e) {
       rethrow;
     }
@@ -131,9 +128,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteAccount({required String userId}) async {
     try {
       // TODO: Implement account deletion
-      throw UnknownException(
-        message: 'Account deletion not yet implemented',
-      );
+      throw UnknownException(message: 'Account deletion not yet implemented');
     } catch (e) {
       rethrow;
     }

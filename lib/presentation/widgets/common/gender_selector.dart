@@ -11,11 +11,11 @@ class GenderSelector extends StatelessWidget {
   final String? label;
 
   const GenderSelector({
-    Key? key,
+    super.key,
     required this.selectedGender,
     required this.onGenderChanged,
     this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

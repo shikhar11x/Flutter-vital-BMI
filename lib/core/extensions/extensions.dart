@@ -1,7 +1,3 @@
-/// Extension methods for better code readability
-/// Provides convenient shortcuts for common operations
-library extensions;
-
 // ============= STRING EXTENSIONS =============
 
 extension StringExtensions on String {
@@ -102,9 +98,7 @@ extension DateTimeExtensions on DateTime {
   /// Check if date is today
   bool get isToday {
     final now = DateTime.now();
-    return year == now.year &&
-        month == now.month &&
-        day == now.day;
+    return year == now.year && month == now.month && day == now.day;
   }
 
   /// Check if date is yesterday

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_radius.dart';
 import '../common/app_card.dart';
 
 /// BMI Result Card showing BMI value and category
@@ -13,12 +12,12 @@ class BMIResultCard extends StatelessWidget {
   final String healthyRangeMax;
 
   const BMIResultCard({
-    Key? key,
+    super.key,
     required this.bmi,
     required this.category,
     required this.healthyRangeMin,
     required this.healthyRangeMax,
-  }) : super(key: key);
+  });
 
   Color _getCategoryColor() {
     switch (category) {

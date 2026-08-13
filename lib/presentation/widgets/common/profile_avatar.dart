@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_radius.dart';
 
 /// Profile avatar widget
 class ProfileAvatar extends StatelessWidget {
@@ -12,13 +10,13 @@ class ProfileAvatar extends StatelessWidget {
   final bool showEditIcon;
 
   const ProfileAvatar({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.initials,
     this.size = 80,
     this.onTap,
     this.showEditIcon = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +34,13 @@ class ProfileAvatar extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.primary.withOpacity(0.8),
-                  AppColors.primary.withOpacity(0.4),
+                  AppColors.primary.withValues(alpha: 0.8),
+                  AppColors.primary.withValues(alpha: 0.4),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -110,11 +108,11 @@ class SmallProfileAvatar extends StatelessWidget {
   final double size;
 
   const SmallProfileAvatar({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.initials,
     this.size = 48,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -9,9 +9,9 @@ class LoadingView extends StatelessWidget {
   final String? message;
 
   const LoadingView({
-    Key? key,
+    super.key,
     this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +49,12 @@ class ErrorView extends StatelessWidget {
   final String retryLabel;
 
   const ErrorView({
-    Key? key,
+    super.key,
     this.title = 'Oops! Something went wrong',
     required this.message,
     this.onRetry,
     this.retryLabel = 'Retry',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -107,13 +107,13 @@ class EmptyStateView extends StatelessWidget {
   final String actionLabel;
 
   const EmptyStateView({
-    Key? key,
+    super.key,
     required this.title,
     required this.message,
     this.icon = Icons.inbox_outlined,
     this.onAction,
     this.actionLabel = 'Get Started',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

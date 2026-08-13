@@ -9,10 +9,10 @@ class BMIScale extends StatelessWidget {
   final String currentCategory;
 
   const BMIScale({
-    Key? key,
+    super.key,
     required this.bmiPosition,
     required this.currentCategory,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_spacing.dart';
 
 /// Custom scaffold widget
 class AppScaffold extends StatelessWidget {
@@ -16,7 +15,7 @@ class AppScaffold extends StatelessWidget {
   final bool safeArea;
 
   const AppScaffold({
-    Key? key,
+    super.key,
     this.title,
     required this.body,
     this.floatingActionButton,
@@ -26,7 +25,7 @@ class AppScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.backgroundColor,
     this.safeArea = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

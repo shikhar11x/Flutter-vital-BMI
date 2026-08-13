@@ -109,4 +109,10 @@ class HeightValidator {
   static bool isValidInches(String? height) {
     return validateInches(height) == null;
   }
+
+  /// Generic validate method that defaults to centimeters
+  /// Can be used with TextFormField validator
+  static String? validate(String? value) {
+    return validateCm(value);
+  }
 }

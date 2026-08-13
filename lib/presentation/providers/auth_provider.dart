@@ -1,140 +1,163 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/datasources/auth_datasource.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../core/errors/app_exception.dart';
 
-// ============= AUTH REPOSITORY PROVIDER =============
+// ============== DATASOURCES ==============
 
-/// Provider for Firebase Auth Datasource
 final authDatasourceProvider = Provider<AuthDatasource>((ref) {
   return FirebaseAuthDatasource();
 });
 
-/// Provider for Auth Repository
+// ============== REPOSITORIES ==============
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final datasource = ref.watch(authDatasourceProvider);
   return AuthRepositoryImpl(datasource: datasource);
 });
 
-// ============= AUTH STATE PROVIDERS =============
+// ============== STATE CLASS ==============
 
-/// Current authenticated user
-final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return authRepository.getCurrentUser();
-});
+class AuthState {
+  final UserEntity? user;
+  final bool isLoading;
+  final String? error;
 
-/// Stream of auth state changes
-final authStateProvider = StreamProvider<UserEntity?>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return authRepository.authStateChanges();
-});
+  const AuthState({
+    this.user,
+    this.isLoading = false,
+    this.error,
+  });
 
-/// Check if user is logged in
-final isLoggedInProvider = FutureProvider<bool>((ref) async {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return authRepository.isUserLoggedIn();
-});
+  AuthState copyWith({
+    UserEntity? user,
+    bool? isLoading,
+    String? error,
+  }) {
+    return AuthState(
+      user: user ?? this.user,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
 
-// ============= AUTH ACTIONS (StateNotifier) =============
+// ============== STATE NOTIFIER ==============
 
-/// Auth state notifier for manual state management
-class AuthStateNotifier extends StateNotifier<UserEntity?> {
-  final AuthRepository _authRepository;
+class AuthNotifier extends StateNotifier<AuthState> {
+  final AuthRepository repository;
 
-  AuthStateNotifier(this._authRepository) : super(null);
+  AuthNotifier(this.repository) : super(const AuthState());
 
-  /// Register with email and password
-  Future<UserEntity> registerWithEmailAndPassword({
+  Future<void> loginWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await repository.loginWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      state = AuthState(user: user);
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      rethrow;
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await repository.loginWithGoogle();
+      state = AuthState(user: user);
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+      rethrow;
+    }
+  }
+
+  Future<void> registerWithEmailAndPassword({
     required String email,
     required String password,
     required String name,
   }) async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _authRepository.registerWithEmailAndPassword(
+      final user = await repository.registerWithEmailAndPassword(
         email: email,
         password: password,
         name: name,
       );
-      state = user;
-      return user;
-    } catch (e) {
+      state = AuthState(user: user);
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
     }
   }
 
-  /// Login with email and password
-  Future<UserEntity> loginWithEmailAndPassword({
+  Future<void> sendPasswordResetEmail({
     required String email,
-    required String password,
   }) async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _authRepository.loginWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      state = user;
-      return user;
-    } catch (e) {
+      await repository.sendPasswordResetEmail(email: email);
+      state = state.copyWith(isLoading: false);
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
     }
   }
 
-  /// Login with Google
-  Future<UserEntity> loginWithGoogle() async {
-    try {
-      final user = await _authRepository.loginWithGoogle();
-      state = user;
-      return user;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Send password reset email
-  Future<void> sendPasswordResetEmail({required String email}) async {
-    try {
-      await _authRepository.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Update user profile
-  Future<UserEntity> updateUserProfile({
-    required String userId,
-    String? name,
-    String? photoUrl,
-  }) async {
-    try {
-      final user = await _authRepository.updateUserProfile(
-        userId: userId,
-        name: name,
-        photoUrl: photoUrl,
-      );
-      state = user;
-      return user;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Logout
   Future<void> logout() async {
+    state = state.copyWith(isLoading: true);
     try {
-      await _authRepository.logout();
-      state = null;
-    } catch (e) {
+      await repository.logout();
+      state = const AuthState();
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
+    }
+  }
+
+  Future<void> checkAuthState() async {
+    try {
+      final user = repository.getCurrentUser();
+      state = AuthState(user: await user);
+    } catch (e) {
+      state = const AuthState();
     }
   }
 }
 
-/// Provider for Auth State Notifier
-final authStateNotifierProvider =
-    StateNotifierProvider<AuthStateNotifier, UserEntity?>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return AuthStateNotifier(authRepository);
+// ============== MAIN PROVIDER ==============
+
+final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return AuthNotifier(repository);
+});
+
+// ============== DERIVED PROVIDERS ==============
+
+final currentUserProvider = Provider<UserEntity?>((ref) {
+  final authState = ref.watch(authProvider);
+  return authState.user;
+});
+
+final isLoggedInProvider = Provider<bool>((ref) {
+  final user = ref.watch(currentUserProvider);
+  return user != null;
+});
+
+final isAuthLoadingProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authProvider);
+  return authState.isLoading;
+});
+
+final authErrorProvider = Provider<String?>((ref) {
+  final authState = ref.watch(authProvider);
+  return authState.error;
 });

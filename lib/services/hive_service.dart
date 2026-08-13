@@ -12,10 +12,7 @@ class HiveService {
       await Hive.openBox<String>(AppConstants.hiveBoxAppPreferences);
       // Note: For ProfileModel and WeightEntryModel, you'd need to register adapters
       // For now, we're using String storage
-
-      print('✅ Hive initialized successfully');
     } catch (e) {
-      print('❌ Hive initialization failed: $e');
       rethrow;
     }
   }
@@ -25,7 +22,7 @@ class HiveService {
     try {
       await Hive.deleteBoxFromDisk(AppConstants.hiveBoxAppPreferences);
     } catch (e) {
-      print('❌ Failed to clear Hive: $e');
+      // Handle clear failure
     }
   }
 }

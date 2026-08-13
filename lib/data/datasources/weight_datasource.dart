@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/weight_entry_model.dart';
-import '../../core/errors/app_exception.dart';
 import '../../core/errors/error_handler.dart';
 
 /// Weight entry datasource interface
@@ -18,9 +17,7 @@ abstract class WeightDatasource {
   Future<WeightEntryModel?> getWeightEntry({required String entryId});
 
   /// Get all weight entries for a profile
-  Future<List<WeightEntryModel>> getWeightEntries({
-    required String profileId,
-  });
+  Future<List<WeightEntryModel>> getWeightEntries({required String profileId});
 
   /// Get weight entries for last N days
   Future<List<WeightEntryModel>> getWeightEntriesForDays({
@@ -29,14 +26,10 @@ abstract class WeightDatasource {
   });
 
   /// Get latest weight entry
-  Future<WeightEntryModel?> getLatestWeightEntry({
-    required String profileId,
-  });
+  Future<WeightEntryModel?> getLatestWeightEntry({required String profileId});
 
   /// Update weight entry
-  Future<WeightEntryModel> updateWeightEntry({
-    required WeightEntryModel entry,
-  });
+  Future<WeightEntryModel> updateWeightEntry({required WeightEntryModel entry});
 
   /// Delete weight entry
   Future<void> deleteWeightEntry({required String entryId});
@@ -101,9 +94,10 @@ class FirestoreWeightDatasource implements WeightDatasource {
         recordedAt: now,
       );
 
-      await _getWeightEntriesCollection(userId, profileId)
-          .doc(entryId)
-          .set(entry.toJson());
+      await _getWeightEntriesCollection(
+        userId,
+        profileId,
+      ).doc(entryId).set(entry.toJson());
 
       return entry;
     } catch (e) {
@@ -142,7 +136,6 @@ class FirestoreWeightDatasource implements WeightDatasource {
   }) async {
     try {
       // Note: Requires userId from auth context
-      final sevenDaysAgo = DateTime.now().subtract(Duration(days: days));
       return [];
     } catch (e) {
       throw ErrorHandler.handleException(e);
